@@ -24,7 +24,9 @@ XFASolverは、証券プロップファームの評価プログラムにおい�
 
 #### 状態空間の定義
 システムの状態は5次元ベクトルで表現される：
-$$\mathbf{s} = (s, h, d, t, r) \in \mathcal{S}$$
+```math
+\mathbf{s} = (s, h, d, t, r) \in \mathcal{S}
+```
 
 where:
 - $s \in \mathbb{Z}$：現在の口座残高
@@ -35,11 +37,14 @@ where:
 
 #### 失効条件（Terminal States）
 口座失効の判定関数：
-$$\text{Failed}(s, h, r) = \begin{cases}
+
+```math
+\text{Failed}(s, h, r) = \begin{cases}
 s \leq 0 & \text{if } r = 1 \text{ (2週目)} \\
 s < h - 2000 & \text{if } r = 0 \text{ and } h \leq 2000 \\
 s \leq 0 & \text{if } r = 0 \text{ and } h > 2000
-\end{cases}$$
+\end{cases}
+```
 
 #### 規定額超過による強制出金
 $d = 5$に達した場合の状態遷移：
@@ -53,23 +58,33 @@ $d = 5$に達した場合の状態遷移：
 
 #### 価値関数の定義
 各状態における累積期待利得の最適価値関数：
-$$V^*(s, h, d, t, r) = \max_{w \in \mathcal{W}(s,h,d,t,r)} \mathbb{E}[R + \gamma \cdot V^*(s', h', d', t+1, r')]$$
+```math
+V^*(s, h, d, t, r) = \max_{w \in \mathcal{W}(s,h,d,t,r)} \mathbb{E}[R + \gamma \cdot V^*(s', h', d', t+1, r')]
+```
 
 #### 行動制約集合
 実行可能ベット額の集合：
-$$\mathcal{W}(s, h, d, t, r) = \{w \in \{50, 100, ..., 4000\} : w \leq \min(\text{MaxDD}(s,h,r) - \text{CurrentDD}(s,h), s)\}$$
+```math
+\mathcal{W}(s, h, d, t, r) = \{w \in \{50, 100, ..., 4000\} : w \leq \min(\text{MaxDD}(s,h,r) - \text{CurrentDD}(s,h), s)\}
+```
 
 #### 最大ドローダウン制約
-$$\text{MaxDD}(s, h, r) = \begin{cases}
+```math
+\text{MaxDD}(s, h, r) = \begin{cases}
 h & \text{if } r = 1 \text{ (2週目)} \\
 2000 & \text{if } r = 0 \text{ and } h \leq 2000 \\
 h & \text{if } r = 0 \text{ and } h > 2000
-\end{cases}$$
+\end{cases}
+```
 
-$$\text{CurrentDD}(s, h) = \max(h - s, 0)$$
+```math
+\text{CurrentDD}(s, h) = \max(h - s, 0)
+```
 
 #### 時間割引因子
-$$\gamma = 0.985$$
+```math
+\gamma = 0.985
+```
 
 この割引因子は：
 - 早期終了に対するインセンティブを提供
@@ -94,24 +109,35 @@ $$\gamma = 0.985$$
 
 #### 境界条件
 1. **規定額超過時** ($d = 5$):
-   $$V^*(s, h, 5, t, r) = 0.5s + V^*(s/2, s/2, 0, 0, 1) \quad \text{if } s/2 \geq 100$$
-   $$V^*(s, h, 5, t, r) = 0.5s \quad \text{if } s/2 < 100$$
+   ```math
+   V^*(s, h, 5, t, r) = 0.5s + V^*(s/2, s/2, 0, 0, 1) \quad \text{if } s/2 \geq 100
+   ```
+   ```math
+   V^*(s, h, 5, t, r) = 0.5s \quad \text{if } s/2 < 100
+   ```
 
 2. **時間切れ** ($t = 10$):
-   $$V^*(s, h, d, 10, r) = 0$$
+   ```math
+   V^*(s, h, d, 10, r) = 0
+   ```
 
 3. **失効状態**:
-   $$V^*(s, h, d, t, r) = 0 \quad \text{if } \text{Failed}(s, h, r) = \text{true}$$
+   ```math
+   V^*(s, h, d, t, r) = 0 \quad \text{if } \text{Failed}(s, h, r) = \text{true}
+   ```
 
 ### 最適政策の導出
 
 #### 政策関数
 最適ベット額を決定する政策：
-$$\pi^*(s, h, d, t, r) = \arg\max_{w \in \mathcal{W}(s,h,d,t,r)} \mathbb{E}[V^*(s', h', d', t+1, r')]$$
+```math
+\pi^*(s, h, d, t, r) = \arg\max_{w \in \mathcal{W}(s,h,d,t,r)} \mathbb{E}[V^*(s', h', d', t+1, r')]
+```
 
 #### 期待価値の計算
-$$\mathbb{E}[V^*(s', h', d', t+1, r')] = \frac{1}{3} V^*(s+2w, \max(h, s+2w), d+\mathbf{1}_{2w \geq 200}, t+1, r)$$
-$$+ \frac{2}{3} \gamma \cdot V^*(s-w, h, d, t+1, r)$$
+```math
+\mathbb{E}[V^*(s', h', d', t+1, r')] = \frac{1}{3} V^*(s+2w, \max(h, s+2w), d+\mathbf{1}_{2w \geq 200}, t+1, r) + \frac{2}{3} \gamma \cdot V^*(s-w, h, d, t+1, r)
+```
 
 ## 技術仕様
 
