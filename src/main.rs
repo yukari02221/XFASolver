@@ -152,7 +152,7 @@ fn dp(state: State, memo: &mut HashMap<State, (f64, i32)>) -> (f64, i32) {
 
         let (win_value, _) = dp(win_state, memo);
         let (lose_value, _) = dp(lose_state, memo);
-        let expected = p_win * win_value + p_lose * lose_value * DISCOUNT_FACTOR;
+        let expected = (p_win * win_value + p_lose * lose_value) * DISCOUNT_FACTOR;
         
         if DEBUG && calc_count < 20 && (w <= 200 || w % 500 == 0) {
             println!("  [BET] w={}, win_val={:.2}, lose_val={:.2}, expected={:.2}", 
